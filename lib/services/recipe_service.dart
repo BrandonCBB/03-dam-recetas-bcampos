@@ -3,7 +3,7 @@ import '../models/receta.dart';
 import 'package:http/http.dart' as http;
 
 class RecipeService {
-  static const String _baseUrl = 'https://doomyjson.com/recipes';
+  static const String _baseUrl = 'https://dummyjson.com/recipes';
 
   Future<List<Receta>> obtenerRecetas() async {
     final Uri url = Uri.parse(_baseUrl);
