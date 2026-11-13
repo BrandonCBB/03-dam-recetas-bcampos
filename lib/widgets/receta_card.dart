@@ -26,7 +26,7 @@ class RecetaCard extends StatelessWidget {
                   height: 72,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stack) => Image.asset(
-                    'assets/images/plato-placeholder.jpg',
+                    'assets/images/Error.png',
                     width: 72,
                     height: 72,
                     fit: BoxFit.cover,
