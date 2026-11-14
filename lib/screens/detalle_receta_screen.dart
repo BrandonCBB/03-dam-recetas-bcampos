@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:recetas_app/data/resenas_db.dart';
 import 'package:recetas_app/models/receta.dart';
+import 'package:recetas_app/models/resena.dart';
+import 'package:recetas_app/widgets/resena_card.dart';
+import 'package:recetas_app/widgets/resena_form.dart';
 
 class DetalleRecetaScreen extends StatefulWidget {
   final Receta receta;
@@ -11,11 +15,54 @@ class DetalleRecetaScreen extends StatefulWidget {
 }
 
 class _DetalleRecetaScreenState extends State<DetalleRecetaScreen> {
+  List<Resena> _resenas = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarResenas();
+  }
+
+  Future<void> _cargarResenas() async {
+    final datos = await ResenasDb.instancia.obtenerPorReceta(widget.receta.id);
+    if (!mounted) return;
+    setState(() => _resenas = datos);
+  }
+
+  void _abrirFormulario() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => ResenaForm(
+        onGuardar: (nombre, texto, calificacion) async {
+          await ResenasDb.instancia.insertar(
+            Resena(
+              recetaId: widget.receta.id,
+              nombre: nombre,
+              texto: texto,
+              calificacion: calificacion,
+              fecha: DateTime.now(),
+            ),
+          );
+          await _cargarResenas();
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final receta = widget.receta;
     return Scaffold(
       appBar: AppBar(title: const Text("Detalle de la receta")),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _abrirFormulario,
+        icon: const Icon(Icons.rate_review),
+        label: const Text('Reseña'),
+        backgroundColor: Colors.deepOrange,
+        foregroundColor: Colors.white,
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -86,6 +133,17 @@ class _DetalleRecetaScreenState extends State<DetalleRecetaScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 20),
+          Text(
+            'Reseñas (${_resenas.length}):',
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          if (_resenas.isEmpty)
+            const Text('Aún no hay reseñas. ¡Sé el primero!')
+          else
+            ..._resenas.map((r) => ResenaCard(resena: r)),
+          const SizedBox(height: 80),
         ],
       ),
     );
